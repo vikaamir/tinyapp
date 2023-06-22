@@ -12,13 +12,29 @@ const urlDatabase = {
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  res.json(
+  );
 });
+
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+app.get("/urls", (req, res) => {
+   const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars)
+});
+
+app.get("/urls/:id", (req, res) => {
+  console.log(req.params)
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+  console.log(templateVars)
+  res.render("urls_show", templateVars);
 });
  
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
