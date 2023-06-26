@@ -46,7 +46,7 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   //To be able to get id use req.params
-  const longURL = urlDatabase[req.params.id]//to get the correct longUrl access database with the id 
+  const longURL = urlDatabase[req.params.id]//to get the correct longUrl access database with the id
   res.redirect(longURL);
 });
 
@@ -56,6 +56,15 @@ app.post("/urls", (req, res) => {
   urlDatabase[newID] = req.body["longURL"]//add new key value to database 
   res.redirect(`/urls/${newID}`);
 });
+
+app.post("/urls/:id/delete", (req, res) => {
+  const deleteID = req.params.id;
+  if (urlDatabase[deleteID]) {
+    delete urlDatabase[deleteID];
+  }
+  res.redirect("/urls");
+});
+   
 
  
 app.listen(PORT, () => {
