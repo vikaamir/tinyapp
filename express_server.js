@@ -36,12 +36,20 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+
 app.get("/urls/:id", (req, res) => {
-  console.log(req.params)
+  //req.params is a object with route parameter in it witch in this case id is in it 
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
   console.log(templateVars)
   res.render("urls_show", templateVars);
 });
+
+app.get("/u/:id", (req, res) => {
+  //To be able to get id use req.params
+  const longURL = urlDatabase[req.params.id]//to get the correct longUrl access database with the id 
+  res.redirect(longURL);
+});
+
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
   let newID = generateRandomString()
