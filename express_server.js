@@ -1,3 +1,4 @@
+const { name } = require("ejs");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -78,6 +79,14 @@ app.get("/urls/:id/edit", (req, res) => {
   let templateVars = {shortUrl: shortUrl, longURL: urlDatabase[shortUrl.longURL]}; // creating a object to dipined long and shotr urls 
   res.render("urls_show", templateVars);
 });
+// set a cookie username to the value 
+app.post("/login", (req, res) => {
+  const name = req.body.username
+  res.cookie("username",name)
+  res.redirect("/urls");
+});
+
+
 
    
 
