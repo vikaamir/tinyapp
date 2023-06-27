@@ -82,7 +82,7 @@ app.get("/urls/:id/edit", (req, res) => {
 // set a cookie username to the value 
 app.post("/login", (req, res) => {
   const name = req.body.username
-  res.cookie("username",name)
+  res.cookie("username", name)
   res.redirect("/urls");
 });
 
