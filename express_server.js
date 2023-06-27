@@ -7,7 +7,7 @@ app.use(express.urlencoded({ extended: true }));
 
 function generateRandomString() {
   // found the solution on stackOverFlow
-  return Array.from(Array(6), () => Math.floor(Math.random() * 36).toString(36)).join(''); 
+  return Array.from(Array(6), () => Math.floor(Math.random() * 36).toString(36)).join('');
 }
 
 const urlDatabase = {
@@ -29,8 +29,8 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-   const templateVars = { urls: urlDatabase };
-  res.render("urls_index", templateVars)
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
@@ -38,22 +38,22 @@ app.get("/urls/new", (req, res) => {
 
 
 app.get("/urls/:id", (req, res) => {
-  //req.params is a object with route parameter in it witch in this case id is in it 
+  //req.params is a object with route parameter in it witch in this case id is in it
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
-  console.log(templateVars)
+  console.log(templateVars);
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
   //To be able to get id use req.params
-  const longURL = urlDatabase[req.params.id]//to get the correct longUrl access database with the id
+  const longURL = urlDatabase[req.params.id];//to get the correct longUrl access database with the id
   res.redirect(longURL);
 });
 
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  let newID = generateRandomString()
-  urlDatabase[newID] = req.body["longURL"]//add new key value to database 
+  let newID = generateRandomString();
+  urlDatabase[newID] = req.body["longURL"];//add new key value to database
   res.redirect(`/urls/${newID}`);
 });
 
@@ -67,15 +67,15 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/urls/:id/edit", (req, res) => {
   const editID = req.params.id;
-  console.log("editID", editID)
-  urlDatabase[editID] = longURL
+  const longURL = req.body.longURL
+  urlDatabase[editID] = longURL;
   res.redirect("/urls");
 });
 
 app.get("/urls/:id/edit", (req, res) => {
-  let shortUrl = req.params.id
- let templateVars = {shortUrl: shortUrl, longURL: urlDatabase[shortUrl.longURL]}
- res.render("urls_show", templateVars)
+  let shortUrl = req.params.id;
+  let templateVars = {shortUrl: shortUrl, longURL: urlDatabase[shortUrl.longURL]};
+  res.render("urls_show", templateVars);
 });
 
    

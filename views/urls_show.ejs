@@ -21,9 +21,9 @@
         <h5 class="card-body"> Edit </h5>
         <p class="card-text">
         </p>
-        <form method="POST" action="/urls">
+        <form method="POST" action="/urls/<%= id %>/Edit">
           <label for="New URL">New URL:</label>
-          <input type="text" name="New URL" placeholder="http://" >
+          <input type="text" name="longURL" placeholder="http://" >
           <button type="submit">Submit</button>
         </form>
       </div>
