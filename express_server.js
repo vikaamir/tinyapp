@@ -32,6 +32,7 @@ app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
@@ -67,14 +68,14 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/urls/:id/edit", (req, res) => {
   const editID = req.params.id;
-  const longURL = req.body.longURL
+  const longURL = req.body.longURL// goes to the longUrl that we creat in urls_show 
   urlDatabase[editID] = longURL;
   res.redirect("/urls");
 });
 
 app.get("/urls/:id/edit", (req, res) => {
   let shortUrl = req.params.id;
-  let templateVars = {shortUrl: shortUrl, longURL: urlDatabase[shortUrl.longURL]};
+  let templateVars = {shortUrl: shortUrl, longURL: urlDatabase[shortUrl.longURL]}; // creating a object to dipined long and shotr urls 
   res.render("urls_show", templateVars);
 });
 
