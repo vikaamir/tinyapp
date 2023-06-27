@@ -64,6 +64,20 @@ app.post("/urls/:id/delete", (req, res) => {
   }
   res.redirect("/urls");
 });
+
+app.post("/urls/:id/edit", (req, res) => {
+  const editID = req.params.id;
+  console.log("editID", editID)
+  urlDatabase[editID] = longURL
+  res.redirect("/urls");
+});
+
+app.get("/urls/:id/edit", (req, res) => {
+  let shortUrl = req.params.id
+ let templateVars = {shortUrl: shortUrl, longURL: urlDatabase[shortUrl.longURL]}
+ res.render("urls_show", templateVars)
+});
+
    
 
  
