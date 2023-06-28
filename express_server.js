@@ -1,9 +1,12 @@
+const { name } = require("ejs");
 const express = require("express");
 const app = express();
+const cookie = require('cookie-parser')
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
+app.use(cookie())
 
 function generateRandomString() {
   // found the solution on stackOverFlow
@@ -13,6 +16,18 @@ function generateRandomString() {
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
 };
 
 app.get("/", (req, res) => {
@@ -29,18 +44,28 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    user:users[req.cookies.user_id],
+    urls: urlDatabase
+  };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    user:users[req.cookies.user_id]
+  };
+  res.render("urls_new", templateVars);
 });
 
 
 app.get("/urls/:id", (req, res) => {
   //req.params is a object with route parameter in it witch in this case id is in it
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    user:users[req.cookies.user_id]
+  };
   console.log(templateVars);
   res.render("urls_show", templateVars);
 });
@@ -75,13 +100,47 @@ app.post("/urls/:id/edit", (req, res) => {
 
 app.get("/urls/:id/edit", (req, res) => {
   let shortUrl = req.params.id;
-  let templateVars = {shortUrl: shortUrl, longURL: urlDatabase[shortUrl.longURL]}; // creating a object to dipined long and shotr urls 
+  let templateVars = {
+    shortUrl: shortUrl,
+    longURL: urlDatabase[shortUrl.longURL], // creating a object to dipined long and shotr urls
+    user:users[req.cookies.user_id]
+  };
   res.render("urls_show", templateVars);
 });
 
-   
+// set a cookie username to the value 
+app.post("/login", (req, res) => {
+  const name = req.body.username
+  res.cookie("username", name)
+  res.redirect("/urls");
+});
 
- 
+//Clears the cookie specified by name.
+app.post("/logout", (req, res) => {
+  res.clearCookie("username")//
+  res.redirect("/urls");
+});
+
+app.get("/register", (req, res) => {
+  const templateVars = {
+    user:users[req.cookies.user_id]
+  };
+  res.render("register", templateVars);
+});
+//creat an object for new regustered user and give user id 
+app.post("/register", (req, res) => {
+  const newID = generateRandomString();
+  const newUser = { 
+    email: req.body.email,
+    password: req.body.password,
+    id: newID
+  };
+  users[newID] = newUser;
+  res.cookie("user_id", newID);
+  res.redirect("/urls");
+  console.log(users)
+ });
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
