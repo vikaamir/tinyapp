@@ -1,10 +1,12 @@
 const { name } = require("ejs");
 const express = require("express");
 const app = express();
+const cookie = require('cookie-parser')
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
+app.use(cookie())
 
 function generateRandomString() {
   // found the solution on stackOverFlow
@@ -30,18 +32,28 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies["username"], 
+    urls: urlDatabase
+  };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("urls_new", templateVars);
 });
 
 
 app.get("/urls/:id", (req, res) => {
   //req.params is a object with route parameter in it witch in this case id is in it
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"]
+  };
   console.log(templateVars);
   res.render("urls_show", templateVars);
 });
@@ -76,15 +88,26 @@ app.post("/urls/:id/edit", (req, res) => {
 
 app.get("/urls/:id/edit", (req, res) => {
   let shortUrl = req.params.id;
-  let templateVars = {shortUrl: shortUrl, longURL: urlDatabase[shortUrl.longURL]}; // creating a object to dipined long and shotr urls 
+  let templateVars = {
+    shortUrl: shortUrl,
+    longURL: urlDatabase[shortUrl.longURL], // creating a object to dipined long and shotr urls
+    username: req.cookies["username"]
+  };
   res.render("urls_show", templateVars);
 });
+
 // set a cookie username to the value 
 app.post("/login", (req, res) => {
   const name = req.body.username
   res.cookie("username", name)
   res.redirect("/urls");
 });
+//Clears the cookie specified by name.
+app.post("/logout", (req, res) => {
+  res.clearCookie("username")//
+  res.redirect("/urls");
+});
+
 
 
 
