@@ -11,7 +11,7 @@ app.use(cookie())
 function generateRandomString() {
   // found the solution on stackOverFlow
   return Array.from(Array(6), () => Math.floor(Math.random() * 36).toString(36)).join('');
-}
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -29,19 +29,22 @@ const users = {
     password: "dishwasher-funk",
   },
 };
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+// helper function to find the email 
+function emailExists(email) {
+  return Object.values(users).some(user => user.email === email);
+};
+// app.get("/", (req, res) => {
+//   res.send("Hello!");
+// });
 
 app.get("/urls.json", (req, res) => {
   res.json(
   );
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
 app.get("/urls", (req, res) => {
   const templateVars = {
@@ -117,7 +120,7 @@ app.post("/login", (req, res) => {
 
 //Clears the cookie specified by name.
 app.post("/logout", (req, res) => {
-  res.clearCookie("username")//
+  res.clearCookie("user_id")//
   res.redirect("/urls");
 });
 
@@ -135,11 +138,16 @@ app.post("/register", (req, res) => {
     password: req.body.password,
     id: newID
   };
-  users[newID] = newUser;
+  // find if email or password alredy exists
+  if(!req.body.email || !req.body.password || emailExists(req.body.email)) {
+    return res.status(400).send("Email or password alredy exists"); 
+  } else {
+    users[newID] = newUser;
   res.cookie("user_id", newID);
-  res.redirect("/urls");
-  console.log(users)
- });
+    res.redirect("/urls")
+
+    }
+  });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
