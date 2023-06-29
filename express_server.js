@@ -31,7 +31,7 @@ const users = {
 };
 // helper function to find the email 
 function emailExists(email) {
-  return Object.values(users).some(user => user.email === email);
+  return Object.values(users).find(user => user.email === email)
 };
 // app.get("/", (req, res) => {
 //   res.send("Hello!");
@@ -51,6 +51,7 @@ app.get("/urls", (req, res) => {
     user:users[req.cookies.user_id],
     urls: urlDatabase
   };
+  console.log(templateVars)
   res.render("urls_index", templateVars);
 });
 
@@ -113,9 +114,18 @@ app.get("/urls/:id/edit", (req, res) => {
 
 // set a cookie username to the value 
 app.post("/login", (req, res) => {
-  const name = req.body.username
-  res.cookie("username", name)
+  const email = req.body.email
+  const user = emailExists(email)
+  console.log(user)
+  res.cookie("user_id", user.id)
   res.redirect("/urls");
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = { 
+   user:users[req.cookies.user_id]
+  };
+  res.render("login", templateVars);
 });
 
 //Clears the cookie specified by name.
@@ -130,6 +140,7 @@ app.get("/register", (req, res) => {
   };
   res.render("register", templateVars);
 });
+
 //creat an object for new regustered user and give user id 
 app.post("/register", (req, res) => {
   const newID = generateRandomString();
