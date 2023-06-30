@@ -20,7 +20,9 @@
     </div>
     <% if (user) { %>
       <!-- User is logged in, show logout button -->
-      <button onclick="location.href='/logout';">Logout</button>
+      <form action="/logout" method="post">
+        <button name="logout" value="logout">Logout</button>
+    </form>
   <% } else { %>
       <!-- User is not logged in, show Register and Login links -->
       <a class="nav-item nav-link" href="/register">Register</a>

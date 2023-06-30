@@ -48,7 +48,7 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const templateVars = {
-    user:users[req.cookies.user_id],
+    user: users[req.cookies.user_id],
     urls: urlDatabase
   };
   console.log(templateVars)
@@ -112,26 +112,34 @@ app.get("/urls/:id/edit", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-// set a cookie username to the value 
+// checks if the email and the password are macthing 
 app.post("/login", (req, res) => {
   const email = req.body.email
-  const user = emailExists(email)
-  console.log(user)
-  res.cookie("user_id", user.id)
-  res.redirect("/urls");
+  const password = req.body.password
+  const user = emailExists(email)// using the existed function for find the user
+  if (!user) {
+    return res.status(403).send("E-mail is not found");
+  } else {
+    if (user["password"] !== password) {
+      return res.status(403).send("Password is not macthing");
+    }
+    res.cookie("user_id", user.id)
+    res.redirect("/urls");
+  }
 });
 
 app.get("/login", (req, res) => {
+  //add user cookie data to templateVars so that header can render correct state
   const templateVars = { 
-   user:users[req.cookies.user_id]
+   user: users[req.cookies.user_id]
   };
   res.render("login", templateVars);
 });
 
-//Clears the cookie specified by name.
+//Clears the cookie specified by id.
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id")//
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 app.get("/register", (req, res) => {
