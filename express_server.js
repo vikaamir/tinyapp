@@ -134,6 +134,7 @@ app.get("/login", (req, res) => {
     user: users[req.cookies.user_id]
   };
   res.render("login", templateVars);
+  res.redirect("/urls");
 });
 
 //Clears the cookie specified by id.
@@ -147,6 +148,8 @@ app.get("/register", (req, res) => {
     user:users[req.cookies.user_id]
   };
   res.render("register", templateVars);
+  res.redirect("/urls");
+
 });
 
 //creat an object for new regustered user and give user id
