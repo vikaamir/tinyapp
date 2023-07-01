@@ -5,7 +5,7 @@ const getUserByEmail = function(email, database) {
       return user;
     }
   }
-  return "undefined";
+  return undefined;
 };
 
 

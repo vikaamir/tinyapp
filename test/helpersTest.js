@@ -22,7 +22,7 @@ describe('getUserByEmail', function() {
   });
   it('should return a undefined', function() {
     const user = getUserByEmail("user3@example.com", testUsers)
-    const expectedUserID = "undefined";
+    const expectedUserID = undefined;
     assert.strictEqual(user, expectedUserID)
   });
 });

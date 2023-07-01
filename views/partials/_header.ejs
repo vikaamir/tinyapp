@@ -20,6 +20,7 @@
     </div>
     <% if (user) { %>
       <!-- User is logged in, show logout button -->
+      <p><%= user.email %></p>
       <form action="/logout" method="post">
         <button name="logout" value="logout">Logout</button>
     </form>
