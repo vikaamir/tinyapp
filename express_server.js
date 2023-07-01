@@ -40,6 +40,17 @@ const users = {
 function emailExists(email) {
   return Object.values(users).find(user => user.email === email);
 };
+function urlsForUser(userID) {
+  // Filter the urlDatabase by comparing the userID with the specified id
+  //Create an empty object to put matching items
+  let filteredItems = {};
+  for(let shortURL in urlDatabase){
+    if(urlDatabase[shortURL]["userID"] === userID){
+      filteredItems[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return filteredItems;
+}
 
 app.get("/urls.json", (req, res) => {
   res.json(
@@ -47,11 +58,16 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies.user_id],
-    urls: urlDatabase
+  const userID  = req.cookies.user_id
+  if (!userID){
+    return res.status(403).send("To see the URLs you need to log-in first!");
+  } else {
+    const templateVars = {
+      user: users[req.cookies.user_id],
+      urls: urlsForUser(userID)
+    };
+    res.render("urls_index", templateVars);
   }
-  res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -65,6 +81,7 @@ app.post("/urls", (req, res) => {
     longURL: req.body["longURL"], //Get longURL from response body
     userID: userID  //Get userID from cookie
   };
+  console.log(urlDatabase);
   res.redirect(`/urls/${newID}`);
 });
 
@@ -76,7 +93,7 @@ app.get("/urls/new", (req, res) => {
     const templateVars = {
       user:users[req.cookies.user_id]
     };
-  res.render("urls_new", templateVars);
+    res.render("urls_new", templateVars);
   }
 });
 
@@ -115,6 +132,16 @@ app.post("/urls/:id/edit", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/urls/:id/edit", (req, res) => {
+  let shortUrl = req.params.id;
+  let templateVars = {
+    shortUrl: shortUrl,
+    longURL: urlDatabase[shortUrl.longURL], // creating a object to dipined long and shotr urls
+    user:users[req.cookies.user_id]
+  };
+  res.render("urls_show", templateVars);
+});
+
 // checks if the email and the password are macthing
 app.post("/login", (req, res) => {
   const email = req.body.email;
@@ -137,7 +164,6 @@ app.get("/login", (req, res) => {
     user: users[req.cookies.user_id]
   };
   res.render("login", templateVars);
-  res.redirect("/urls");
 });
 
 //Clears the cookie specified by id.
@@ -151,7 +177,6 @@ app.get("/register", (req, res) => {
     user:users[req.cookies.user_id]
   };
   res.render("register", templateVars);
-  res.redirect("/urls");
 });
 
 //creat an object for new regustered user and give user id
