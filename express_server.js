@@ -90,17 +90,13 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const userID  = req.cookies.user_id
-  const longURL = urlDatabase[req.params.id];//to get the correct longUrl access database with the id
-  if (!userID) {
+  const shortURL  = req.params.id
+  const longURL = urlDatabase[shortURL];//to get the correct longUrl access database with the id
+  if (!longURL) {
     return res.status(403).send(`This page  is not in the database`);
-
-
-  }
+  } else {
   res.redirect(longURL);
-});
-
-
+}});
 
 app.post("/urls/:id/delete", (req, res) => {
   const deleteID = req.params.id;
@@ -174,16 +170,21 @@ app.post("/register", (req, res) => {
     password: req.body.password,
     id: newID
   };
-  // find if email or password alredy exists
-  if (!req.body.email || !req.body.password || emailExists(req.body.email)) {
-    return res.status(400).send("Email or password alredy exists");
-  } else {
+//if email or password empty return messege 
+  if (!req.body.email || !req.body.password ){
+    return res.status(400).send("Please fill in email and password");
+  }// if email alredy exists
+   else if (emailExists(req.body.email)){
+    return res.status(400).send("Email alredy exists");
+  }
+   else {
     users[newID] = newUser;
     res.cookie("user_id", newID);
     res.redirect("/urls");
-
   }
 });
+  
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
