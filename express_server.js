@@ -44,8 +44,8 @@ const users = {
 };
 
 // helper function to find the email
-function emailExists(email) {
-  return Object.values(users).find(user => user.email === email);
+function emailExists(email, userDB) {
+  return Object.values(userDB).find(user => user.email === email);
 };
 function urlsForUser(userID) {
   // Filter the urlDatabase by comparing the userID with the specified id
@@ -57,7 +57,7 @@ function urlsForUser(userID) {
     }
   }
   return filteredItems;
-}
+};
 
 app.get("/urls.json", (req, res) => {
   res.json(
@@ -172,7 +172,7 @@ app.get("/urls/:id/edit", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = emailExists(email);// using the existed function for find the user
+  const user = emailExists(email, users);// using the existed function for find the user
   if (!user) {
     return res.status(403).send("E-mail is not found");
   } else {
@@ -219,7 +219,7 @@ app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send("Please fill in email and password");
   }// if email alredy exists
-  else if (emailExists(req.body.email)) {
+  else if (emailExists(req.body.email, users)) {
     return res.status(400).send("Email alredy exists");
   }
   else {
