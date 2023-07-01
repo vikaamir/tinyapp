@@ -5,7 +5,7 @@ const cookie = require('cookie-session');
 const PORT = 8080; // default port 8080
 const bcrypt = require("bcryptjs");
 const SALT_ROUNDS = 10;
-const { emailExists } = require("./helpers")
+const {getUserByEmail} = require("./helpers")
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -64,7 +64,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id
   if (!userID) {
-    return res.status(403).send("To see the URLs you need to log-in first!");
+    return res.status(403).send("<h2>To see the URLs you need to log-in first!</h2>");
   } else {
     const templateVars = {
       user: users[userID],
@@ -169,15 +169,15 @@ app.get("/urls/:id/edit", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = emailExists(email, users);// using the existed function for find the user
-  if (!user) {
+  const userID = getUserByEmail(email, users);// using the existed function for find the user
+  if (!userID) {
     return res.status(403).send("E-mail is not found");
   } else {
-    if (!bcrypt.compareSync(password, user.password))
+    if (!bcrypt.compareSync(password, users[userID]["password"]))
      {
       return res.status(403).send("Password is not macthing");
     }
-    req.session.user_id = user.id;
+    req.session.user_id = userID;
     res.redirect("/urls");
   }
 });
@@ -216,7 +216,7 @@ app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send("Please fill in email and password");
   }// if email alredy exists
-  else if (emailExists(req.body.email, users)) {
+  else if (getUserByEmail(req.body.email, users)) {
     return res.status(400).send("Email alredy exists");
   }
   else {

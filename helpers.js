@@ -1,12 +1,14 @@
 
-
-// helper function to find the email
-function emailExists(email, userDB) {
-  return Object.values(userDB).find(user => user.email === email);
+const getUserByEmail = function(email, database) {
+  for (let user in database){
+    if ( database[user]["email"] === email){
+      return user;
+    }
+  }
+  return "undefined";
 };
 
 
-
 module.exports = {
-  emailExists,
+  getUserByEmail,
 }
