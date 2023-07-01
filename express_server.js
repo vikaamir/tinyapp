@@ -44,8 +44,8 @@ function urlsForUser(userID) {
   // Filter the urlDatabase by comparing the userID with the specified id
   //Create an empty object to put matching items
   let filteredItems = {};
-  for(let shortURL in urlDatabase){
-    if(urlDatabase[shortURL]["userID"] === userID){
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL]["userID"] === userID) {
       filteredItems[shortURL] = urlDatabase[shortURL];
     }
   }
@@ -58,8 +58,8 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const userID  = req.cookies.user_id
-  if (!userID){
+  const userID = req.cookies.user_id
+  if (!userID) {
     return res.status(403).send("To see the URLs you need to log-in first!");
   } else {
     const templateVars = {
@@ -71,8 +71,8 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const userID  = req.cookies.user_id
-  if (!userID){
+  const userID = req.cookies.user_id
+  if (!userID) {
     return res.status(403).send("To create a short URL, please log-in first!");
   }
   let newID = generateRandomString();
@@ -86,50 +86,65 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const userID  = req.cookies.user_id
-  if (!userID){
+  const userID = req.cookies.user_id
+  if (!userID) {
     res.redirect("/login")
   } else {
     const templateVars = {
-      user:users[req.cookies.user_id]
+      user: users[req.cookies.user_id]
     };
     res.render("urls_new", templateVars);
   }
 });
 
 app.get("/urls/:id", (req, res) => {
-  //req.params is a object with route parameter in it witch in this case id is in it
-  const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id]["longURL"],
-    user:users[req.cookies.user_id]
+  if (!req.cookies.user_id) {
+    return res.status(403).send(`please log in`);
   }
-  res.render("urls_show", templateVars);
+  const shortURL = req.params.id
+  //req.params is a object with route parameter in it witch in this case id is in it
+  if (urlDatabase[shortURL]) {
+    const templateVars = {
+      id: req.params.id,
+      longURL: urlDatabase[req.params.id]["longURL"],
+      user: users[req.cookies.user_id]
+    }
+    res.render("urls_show", templateVars);
+  } else {
+    return res.status(404).send(`This page  is not in the database`);
+  }
 });
 
 //u:id redirect to the longURL page 
 app.get("/u/:id", (req, res) => {
-  const shortURL  = req.params.id
+  const shortURL = req.params.id
   const longURL = urlDatabase[shortURL]["longURL"];//to get the correct longUrl access database with the id
   if (!longURL) {
-    return res.status(403).send(`This page  is not in the database`);
+    return res.status(403).send(`This page is not in the database`);
   } else {
-  res.redirect(longURL);
-}});
+    res.redirect(longURL);
+  }
+});
 
 app.post("/urls/:id/delete", (req, res) => {
   const deleteID = req.params.id;
   if (urlDatabase[deleteID]) {
     delete urlDatabase[deleteID];
+    res.redirect("/urls");
+  } else {
+    return res.status(403).send(`This id is not exists`);
   }
-  res.redirect("/urls");
 });
 
 app.post("/urls/:id/edit", (req, res) => {
   const editID = req.params.id;
   const longURL = req.body.longURL;// goes to the longUrl that we creat in urls_show
+  if(req.params.id){
   urlDatabase[editID]["longURL"] = longURL;
   res.redirect("/urls");
+  } else {
+    return res.status(403).send(`you can not edit this url`)
+  }
 });
 
 app.get("/urls/:id/edit", (req, res) => {
@@ -137,7 +152,7 @@ app.get("/urls/:id/edit", (req, res) => {
   let templateVars = {
     shortUrl: shortUrl,
     longURL: urlDatabase[shortUrl.longURL], // creating a object to dipined long and shotr urls
-    user:users[req.cookies.user_id]
+    user: users[req.cookies.user_id]
   };
   res.render("urls_show", templateVars);
 });
@@ -174,7 +189,7 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    user:users[req.cookies.user_id]
+    user: users[req.cookies.user_id]
   };
   res.render("register", templateVars);
 });
@@ -187,14 +202,14 @@ app.post("/register", (req, res) => {
     password: req.body.password,
     id: newID
   };
-//if email or password empty return messege 
-  if (!req.body.email || !req.body.password ) {
+  //if email or password empty return messege 
+  if (!req.body.email || !req.body.password) {
     return res.status(400).send("Please fill in email and password");
   }// if email alredy exists
-   else if (emailExists(req.body.email)) {
+  else if (emailExists(req.body.email)) {
     return res.status(400).send("Email alredy exists");
   }
-   else {
+  else {
     users[newID] = newUser;
     res.cookie("user_id", newID);
     res.redirect("/urls");
