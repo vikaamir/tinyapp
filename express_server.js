@@ -3,6 +3,8 @@ const express = require("express");
 const app = express();
 const cookie = require('cookie-parser');
 const PORT = 8080; // default port 8080
+const bcrypt = require("bcryptjs");
+const SALT_ROUNDS = 10;
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -103,7 +105,10 @@ app.get("/urls/:id", (req, res) => {
   }
   const shortURL = req.params.id
   //req.params is a object with route parameter in it witch in this case id is in it
-  if (urlDatabase[shortURL]) {
+  if (!urlDatabase[shortURL]){
+    return res.status(404).send(`This page  is not in the database`)
+  };// checks if the user id is the same userid of the shorURL
+  if (urlDatabase[shortURL].userID === req.cookies.user_id) {
     const templateVars = {
       id: req.params.id,
       longURL: urlDatabase[req.params.id]["longURL"],
@@ -111,7 +116,7 @@ app.get("/urls/:id", (req, res) => {
     }
     res.render("urls_show", templateVars);
   } else {
-    return res.status(404).send(`This page  is not in the database`);
+    return res.status(404).send(`You do not have access`);
   }
 });
 
@@ -161,11 +166,14 @@ app.get("/urls/:id/edit", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const user = emailExists(email);// using the existed function for find the user
+  console.log(user)
   if (!user) {
     return res.status(403).send("E-mail is not found");
   } else {
-    if (user["password"] !== password) {
+    if (bcrypt.compareSync(user.password, hashedPassword))
+     {
       return res.status(403).send("Password is not macthing");
     }
     res.cookie("user_id", user.id);
@@ -197,9 +205,12 @@ app.get("/register", (req, res) => {
 //creat an object for new regustered user and give user id
 app.post("/register", (req, res) => {
   const newID = generateRandomString();
+  //
+  const salt = bcrypt.genSaltSync(SALT_ROUNDS)
+  const hashPassword = bcrypt.hashSync(req.body.password, salt)
   const newUser = {
     email: req.body.email,
-    password: req.body.password,
+    password: hashPassword,
     id: newID
   };
   //if email or password empty return messege 
