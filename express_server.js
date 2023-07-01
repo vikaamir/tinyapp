@@ -11,47 +11,46 @@ app.use(cookie());
 function generateRandomString() {
   // found the solution on stackOverFlow
   return Array.from(Array(6), () => Math.floor(Math.random() * 36).toString(36)).join('');
-}
-
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
 };
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  }
+};
+
 const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur",
   },
-  user2RandomID: {
-    id: "user2RandomID",
+  aJ48lW: {
+    id: "aJ48lW",
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
 };
+
 // helper function to find the email
 function emailExists(email) {
   return Object.values(users).find(user => user.email === email);
-}
-// app.get("/", (req, res) => {
-//   res.send("Hello!");
-// });
+};
 
 app.get("/urls.json", (req, res) => {
   res.json(
   );
 });
 
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-
 app.get("/urls", (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
     urls: urlDatabase
-  };
-  console.log(templateVars);
+  }
   res.render("urls_index", templateVars);
 });
 
@@ -60,9 +59,12 @@ app.post("/urls", (req, res) => {
   if (!userID){
     return res.status(403).send("To create a short URL, please log-in first!");
   }
-  console.log(req.body); // Log the POST request body to the console
   let newID = generateRandomString();
-  urlDatabase[newID] = req.body["longURL"];//add new key value to database
+  //add new key value to database
+  urlDatabase[newID] = {
+    longURL: req.body["longURL"], //Get longURL from response body
+    userID: userID  //Get userID from cookie
+  };
   res.redirect(`/urls/${newID}`);
 });
 
@@ -82,16 +84,16 @@ app.get("/urls/:id", (req, res) => {
   //req.params is a object with route parameter in it witch in this case id is in it
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id]["longURL"],
     user:users[req.cookies.user_id]
-  };
-  console.log(templateVars);
+  }
   res.render("urls_show", templateVars);
 });
 
+//u:id redirect to the longURL page 
 app.get("/u/:id", (req, res) => {
   const shortURL  = req.params.id
-  const longURL = urlDatabase[shortURL];//to get the correct longUrl access database with the id
+  const longURL = urlDatabase[shortURL]["longURL"];//to get the correct longUrl access database with the id
   if (!longURL) {
     return res.status(403).send(`This page  is not in the database`);
   } else {
@@ -109,18 +111,8 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   const editID = req.params.id;
   const longURL = req.body.longURL;// goes to the longUrl that we creat in urls_show
-  urlDatabase[editID] = longURL;
+  urlDatabase[editID]["longURL"] = longURL;
   res.redirect("/urls");
-});
-
-app.get("/urls/:id/edit", (req, res) => {
-  let shortUrl = req.params.id;
-  let templateVars = {
-    shortUrl: shortUrl,
-    longURL: urlDatabase[shortUrl.longURL], // creating a object to dipined long and shotr urls
-    user:users[req.cookies.user_id]
-  };
-  res.render("urls_show", templateVars);
 });
 
 // checks if the email and the password are macthing
@@ -171,10 +163,10 @@ app.post("/register", (req, res) => {
     id: newID
   };
 //if email or password empty return messege 
-  if (!req.body.email || !req.body.password ){
+  if (!req.body.email || !req.body.password ) {
     return res.status(400).send("Please fill in email and password");
   }// if email alredy exists
-   else if (emailExists(req.body.email)){
+   else if (emailExists(req.body.email)) {
     return res.status(400).send("Email alredy exists");
   }
    else {
@@ -183,8 +175,6 @@ app.post("/register", (req, res) => {
     res.redirect("/urls");
   }
 });
-  
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
