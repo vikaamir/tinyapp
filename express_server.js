@@ -5,6 +5,7 @@ const cookie = require('cookie-session');
 const PORT = 8080; // default port 8080
 const bcrypt = require("bcryptjs");
 const SALT_ROUNDS = 10;
+const { emailExists } = require("./helpers")
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -43,10 +44,6 @@ const users = {
   },
 };
 
-// helper function to find the email
-function emailExists(email, userDB) {
-  return Object.values(userDB).find(user => user.email === email);
-};
 function urlsForUser(userID) {
   // Filter the urlDatabase by comparing the userID with the specified id
   //Create an empty object to put matching items
